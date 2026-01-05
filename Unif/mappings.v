@@ -1977,6 +1977,10 @@ Definition term_rec (P : term -> Set) (Q : list term -> Set) := term_rect P Q.
 
 Set Implicit Arguments.
 
+Register Scheme term_rect as rect_nodep for term.
+Register Scheme term_rec as rec_nodep for term.
+Register Scheme term_ind as ind_nodep for term.
+
 (* _dest_term and _dest_list are codefined but coq doesn't accept it so it is split in two with
    a fix inside. *)
 Fixpoint _dest_term t : recspace N :=

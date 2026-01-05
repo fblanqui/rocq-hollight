@@ -1,10 +1,11 @@
+Require Import Corelib.Init.Wf HB.structures.
+From Stdlib Require Import BinNat List Lia PeanoNat Ascii Setoid.
 From mathcomp Require Import ssreflect ssrfun ssrbool eqtype ssrnat choice.
 From mathcomp Require Import boolp classical_sets functions.
-From Stdlib Require Import BinNat List ProofIrrelevance Lia PeanoNat Ascii Setoid.
-Require Import Corelib.Init.Wf HB.structures.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
+
 
 (****************************************************************************)
 (* Notation to easily rewrite a view. *)
@@ -220,6 +221,20 @@ Qed.
 
 Lemma sym {A} (x y : A) : (x = y) = (y = x).
 Proof. by ext. Qed.
+
+(****************************************************************************)
+(* Derive proof irrelevance. *)
+(****************************************************************************)
+
+Lemma proof_irrelevance (P : Prop) :
+  forall (p p' : P), p = p'.
+Proof.
+  case (EM P).
+  - by rewrite -{1}(is_True P)=>->.
+  - by rewrite -(is_False P).
+Qed.
+
+Arguments proof_irrelevance: clear implicits.
 
 (****************************************************************************)
 (* if then else over Prop *)
@@ -1211,16 +1226,16 @@ Section Quotient.
   Lemma eq_class_intro_elt (x y: quotient) : R (elt_of x) (elt_of y) -> x = y.
   Proof.
     destruct x as [c [x h]]. destruct y as [d [y i]]. unfold elt_of. simpl.
-    intro r. apply subset_eq_compat. subst c. subst d.
-    ext=> a j.
-
-    apply R_trans with (ε (R y)). apply eq_elt_of.
-    apply R_trans with (ε (R x)). apply R_sym. apply r.
-    apply R_trans with x. apply R_sym. apply eq_elt_of. exact j.
-
-    apply R_trans with (ε (R x)). apply eq_elt_of.
-    apply R_trans with (ε (R y)). apply r.
-    apply R_trans with y. apply R_sym. apply eq_elt_of. exact j.
+    intro r. generalize (ex_intro (fun a : A => c = R a) x h)
+      (ex_intro (fun a : A => d = R a) y i).
+    have -> : c = d ; last by move=>* ; f_equal ; exact: proof_irrelevance.
+    rewrite h i. ext=> z.
+    - move => ?. apply: (R_trans (eq_elt_of y)).
+      rewrite i in r. apply (R_trans (R_sym r)).
+      rewrite h. by apply: (R_trans (R_sym (eq_elt_of x))).
+    - move => ?. apply: (R_trans (eq_elt_of x)).
+      rewrite h in r. apply (R_trans r).
+      rewrite i. by apply: (R_trans (R_sym (eq_elt_of y))).
   Qed.
 
   Lemma eq_class_intro (x y: A) : R x y -> R x = R y.
@@ -1621,7 +1636,7 @@ Qed.
 
 Definition fact := N.peano_rect (fun _ => N) 1 (fun n r => N.succ n * r).
 
-Lemma FACT_def : fact = @ε ((prod N (prod N (prod N N))) -> N -> N) (fun FACT' : (prod N (prod N (prod N N))) -> N -> N => forall _2944 : prod N (prod N (prod N N)), ((FACT' _2944 (NUMERAL 0%N)) = (NUMERAL (BIT1 0%N))) /\ (forall n : N, (FACT' _2944 (N.succ n)) = (N.mul (N.succ n) (FACT' _2944 n)))) (@pair N (prod N (prod N N)) (NUMERAL (BIT0 (BIT1 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%N)))))))) (@pair N (prod N N) (NUMERAL (BIT1 (BIT0 (BIT0 (BIT0 (BIT0 (BIT0 (BIT1 0%N)))))))) (@pair N N (NUMERAL (BIT1 (BIT1 (BIT0 (BIT0 (BIT0 (BIT0 (BIT1 0%N)))))))) (NUMERAL (BIT0 (BIT0 (BIT1 (BIT0 (BIT1 (BIT0 (BIT1 0%N))))))))))).
+Lemma FACT_def : fact = @ε ((prod N (prod N (prod N N))) -> N -> N) (fun FACT' : (prod N (prod N (prod N N))) -> N -> N => forall _2944 : prod N (prod N (prod N N)), ((FACT' _2944 (NUMERAL 0%num)) = (NUMERAL (BIT1 0%num))) /\ (forall n : N, (FACT' _2944 (N.succ n)) = (N.mul (N.succ n) (FACT' _2944 n)))) (@pair N (prod N (prod N N)) (NUMERAL (BIT0 (BIT1 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%num)))))))) (@pair N (prod N N) (NUMERAL (BIT1 (BIT0 (BIT0 (BIT0 (BIT0 (BIT0 (BIT1 0%num)))))))) (@pair N N (NUMERAL (BIT1 (BIT1 (BIT0 (BIT0 (BIT0 (BIT0 (BIT1 0%num)))))))) (NUMERAL (BIT0 (BIT0 (BIT1 (BIT0 (BIT1 (BIT0 (BIT1 0%num))))))))))).
 Proof.
   numsimp. N_rec_align.
   unfold fact. now rewrite N.peano_rect_succ.
@@ -1745,13 +1760,13 @@ Proof.
     + exact (absurd _).
 Qed.
 
-Lemma EVEN_def : N.Even = @ε ((prod N (prod N (prod N N))) -> N -> Prop) (fun EVEN' : (prod N (prod N (prod N N))) -> N -> Prop => forall _2603 : prod N (prod N (prod N N)), ((EVEN' _2603 (NUMERAL 0%N)) = True) /\ (forall n : N, (EVEN' _2603 (N.succ n)) = (~ (EVEN' _2603 n)))) (@pair N (prod N (prod N N)) (NUMERAL (BIT1 (BIT0 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%N)))))))) (@pair N (prod N N) (NUMERAL (BIT0 (BIT1 (BIT1 (BIT0 (BIT1 (BIT0 (BIT1 0%N)))))))) (@pair N N (NUMERAL (BIT1 (BIT0 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%N)))))))) (NUMERAL (BIT0 (BIT1 (BIT1 (BIT1 (BIT0 (BIT0 (BIT1 0%N))))))))))).
+Lemma EVEN_def : N.Even = @ε ((prod N (prod N (prod N N))) -> N -> Prop) (fun EVEN' : (prod N (prod N (prod N N))) -> N -> Prop => forall _2603 : prod N (prod N (prod N N)), ((EVEN' _2603 (NUMERAL 0%num)) = True) /\ (forall n : N, (EVEN' _2603 (N.succ n)) = (~ (EVEN' _2603 n)))) (@pair N (prod N (prod N N)) (NUMERAL (BIT1 (BIT0 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%num)))))))) (@pair N (prod N N) (NUMERAL (BIT0 (BIT1 (BIT1 (BIT0 (BIT1 (BIT0 (BIT1 0%num)))))))) (@pair N N (NUMERAL (BIT1 (BIT0 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%num)))))))) (NUMERAL (BIT0 (BIT1 (BIT1 (BIT1 (BIT0 (BIT0 (BIT1 0%num))))))))))).
 Proof.
   numsimp. N_rec_align.
   exact (NEven0). apply (NEvenS).
 Qed.
 
-Lemma ODD_def: N.Odd = @ε ((prod N (prod N N)) -> N -> Prop) (fun ODD' : (prod N (prod N N)) -> N -> Prop => forall _2607 : prod N (prod N N), ((ODD' _2607 (NUMERAL 0%N)) = False) /\ (forall n : N, (ODD' _2607 (N.succ n)) = (~ (ODD' _2607 n)))) (@pair N (prod N N) (NUMERAL (BIT1 (BIT1 (BIT1 (BIT1 (BIT0 (BIT0 (BIT1 0%N)))))))) (@pair N N (NUMERAL (BIT0 (BIT0 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%N)))))))) (NUMERAL (BIT0 (BIT0 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%N)))))))))).
+Lemma ODD_def: N.Odd = @ε ((prod N (prod N N)) -> N -> Prop) (fun ODD' : (prod N (prod N N)) -> N -> Prop => forall _2607 : prod N (prod N N), ((ODD' _2607 (NUMERAL 0%num)) = False) /\ (forall n : N, (ODD' _2607 (N.succ n)) = (~ (ODD' _2607 n)))) (@pair N (prod N N) (NUMERAL (BIT1 (BIT1 (BIT1 (BIT1 (BIT0 (BIT0 (BIT1 0%num)))))))) (@pair N N (NUMERAL (BIT0 (BIT0 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%num)))))))) (NUMERAL (BIT0 (BIT0 (BIT1 (BIT0 (BIT0 (BIT0 (BIT1 0%num)))))))))).
 Proof.
   numsimp. N_rec_align.
   exact (NOdd0). apply (NOddS).
@@ -2636,7 +2651,7 @@ Qed.
 (* Note the mismatch between Rocq's ascii which takes booleans as arguments
 and HOL-Light's char which takes propositions as arguments. *)
 
-HB.instance Definition _ := is_Type' zero.
+HB.instance Definition _ := is_Type' Ascii.zero.
 
 Definition _dest_char : ascii -> recspace (Prop*(Prop*(Prop*(Prop*(Prop*(Prop*(Prop*(Prop)))))))) :=
   fun a => match a with
@@ -2830,7 +2845,9 @@ Abort.*)
 Lemma nadd_add_lcancel x y z : nadd_add x y = nadd_add x z -> y = z.
 Proof.
   intro h. destruct x as [x hx]. destruct y as [y hy]. destruct z as [z hz].
-  apply subset_eq_compat. unfold nadd_add in h. simpl in h. apply mk_inj in h.
+  generalize hy hz.
+  have -> : y = z ; last by move=>* ; f_equal ; exact: proof_irrelevance.
+  unfold nadd_add in h. simpl in h. apply mk_inj in h.
   ext=>a. generalize (ext_fun h a); simpl; intro ha. lia.
   apply is_nadd_add_aux; assumption. apply is_nadd_add_aux; assumption.
 Qed.
