@@ -1245,7 +1245,7 @@ Qed.
 
 Lemma axiom_29 : forall (A B : Type') (a : cart A B), (@mk_cart A B (@dest_cart A B a)) = a.
 Proof.
-  by rewrite/mk_cart/dest_cart=> *; apply/matrixP=> -[[]] *; rewrite mxE ord1.
+  by rewrite/mk_cart/dest_cart=> *; apply/matrixP=> -[[]] *; rewrite mxE !ord1.
 Qed.
 
 Lemma axiom_30 : forall (A B : Type') (r : (finite_image B) -> A), ((fun f : (finite_image B) -> A => True) r) = ((@dest_cart A B (@mk_cart A B r)) = r).

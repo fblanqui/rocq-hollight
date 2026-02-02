@@ -664,10 +664,7 @@ Lemma axiom_11 {A B : Type'} : forall (a : sum A B), (@_mk_sum A B (@_dest_sum A
 Proof. _mk_dest_inductive. Qed.
 
 Lemma axiom_12 : forall {A B : Type'} (r : recspace (prod A B)), ((fun a : recspace (prod A B) => forall sum' : (recspace (prod A B)) -> Prop, (forall a' : recspace (prod A B), ((exists a'' : A, a' = ((fun a''' : A => @CONSTR (prod A B) (NUMERAL 0) (@pair A B a''' (@ε B (fun v : B => True))) (fun n : nat => @BOTTOM (prod A B))) a'')) \/ (exists a'' : B, a' = ((fun a''' : B => @CONSTR (prod A B) (S (NUMERAL 0)) (@pair A B (@ε A (fun v : A => True)) a''') (fun n : nat => @BOTTOM (prod A B))) a''))) -> sum' a') -> sum' a) r) = ((@_dest_sum A B (@_mk_sum A B r)) = r).
-Proof.
-  _dest_mk_inductive.
-  now exists (inl x0). now exists (inr x0).
-Qed.
+Proof. by _dest_mk_inductive. Qed.
 
 Lemma INL_def {A B : Type'} : (@inl A B) = (fun a : A => @_mk_sum A B ((fun a' : A => @CONSTR (prod A B) (NUMERAL 0) (@pair A B a' (@ε B (fun v : B => True))) (fun n : nat => @BOTTOM (prod A B))) a)).
 Proof. constr_align (@axiom_11 A B). Qed.
@@ -699,9 +696,7 @@ Definition option_pred {A : Type'} (r : recspace A) :=
        option' a') -> option' r.
 
 Lemma axiom_14' : forall {A : Type'} (r : recspace A), (option_pred r) = ((@_dest_option A (@_mk_option A r)) = r).
-Proof.
-  _dest_mk_inductive. now exists None. now exists (Some x0).
-Qed.
+Proof. by _dest_mk_inductive. Qed.
 
 Lemma axiom_14 : forall {A : Type'} (r : recspace A), ((fun a : recspace A => forall option' : (recspace A) -> Prop, (forall a' : recspace A, ((a' = (@CONSTR A (NUMERAL 0) (@ε A (fun v : A => True)) (fun n : nat => @BOTTOM A))) \/ (exists a'' : A, a' = ((fun a''' : A => @CONSTR A (S (NUMERAL 0)) a''' (fun n : nat => @BOTTOM A)) a''))) -> option' a') -> option' a) r) = ((@_dest_option A (@_mk_option A r)) = r).
 Proof. exact @axiom_14'. Qed.
@@ -730,11 +725,7 @@ Lemma axiom_15 {A : Type'} : forall (a : seq A), (@_mk_seq A (@_dest_seq A a)) =
 Proof. _mk_dest_inductive. Qed.
 
 Lemma axiom_16 : forall {A : Type'} (r : recspace A), ((fun a : recspace A => forall seq : (recspace A) -> Prop, (forall a' : recspace A, ((a' = (@CONSTR A (NUMERAL 0) (@ε A (fun v : A => True)) (fun n : nat => @BOTTOM A))) \/ (exists a0 : A, exists a1 : recspace A, (a' = ((fun a0' : A => fun a1' : recspace A => @CONSTR A (S (NUMERAL 0)) a0' (@FCONS (recspace A) a1' (fun n : nat => @BOTTOM A))) a0 a1)) /\ (seq a1))) -> seq a') -> seq a) r) = ((@_dest_seq A (@_mk_seq A r)) = r).
-Proof.
-  _dest_mk_inductive.
-  - now exists [::].
-  - exists (cons x0 x2). now rewrite <- H0.
-Qed.
+Proof. by _dest_mk_inductive. Qed.
 
 Lemma NIL_def {A : Type'} : (Nil A) = (@_mk_seq A (@CONSTR A (NUMERAL 0) (@ε A (fun v : A => True)) (fun n : nat => @BOTTOM A))).
 Proof. constr_align (@axiom_15 A). Qed.
@@ -987,7 +978,7 @@ Lemma axiom_18' : forall (r : recspace (prod Prop (prod Prop (prod Prop (prod Pr
 char_pred r = ((_dest_char (_mk_char r)) = r).
 Proof.
   _dest_mk_inductive.
-  by exists (Ascii x0 x1 x2 x3 x4 x5 x6 x7)=> /= ; repeat rewrite asboolE.
+  by exists (Ascii x0 x1 x2 x3 x4 x5 x6 x7) ; rewrite/= 8!asboolE.
 Qed.
 
 Lemma axiom_18 : forall (r : recspace (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop Prop)))))))), ((fun a : recspace (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop Prop))))))) => forall char' : (recspace (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop Prop)))))))) -> Prop, (forall a' : recspace (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop (prod Prop Prop))))))), (exists a0 : Prop, exists a1 : Prop, exists a2 : Prop, exists a3 : Prop, exists a4 : Prop, exists a5 : Prop, exists a6 : Prop, exists a7 : Prop, a' =

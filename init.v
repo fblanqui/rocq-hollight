@@ -1030,6 +1030,8 @@ Ltac _mk_dest_inductive := finv_inv_l ; try _dest_inj_inductive.
    Compared to ind_align, we do not have access to the constructor tactic to automatically
    find the correct constructor so it currently needs to be done by hand. *)
 
+Ltac blindrewrite_rev := repeat match goal with H : _ |- _ => rewrite -H end.
+
 Ltac _dest_mk_inductive :=
   let H := fresh in 
   let x := fresh "x" in
@@ -1038,7 +1040,8 @@ Ltac _dest_mk_inductive :=
   [ intro H ; apply H ;
     clear H ; intros x H ;
     full_destruct ; rewrite H ;
-    clear H ; simpl in *
+    clear H ; simpl in * ;
+    try (unshelve eexists ; [econstructor | blindrewrite_rev ; reflexivity])
   | (* simply inducting over [x] such that [_dest_ x = r]. *)
     intros (x,<-) P ;
     induction x ;
