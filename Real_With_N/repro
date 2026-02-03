@@ -1,0 +1,27 @@
+#!/bin/sh
+
+. ../setup
+
+hollight_file=hol_upto_real.ml
+dump_simp_option=-before-hol
+lpfile=mappings.lp
+vfiles='type.v mappings.v'
+mkfile=mappings.mk
+require='Stdlib.NArith.BinNat mathcomp.classical.classical_sets'
+
+base=`basename $hollight_file .ml`
+root_path=`awk -F'[":]' '/logpath/{print $3}' opam`
+jobs='-j32'
+
+# we prefix $lpfile, $vfiles and $mkfile with "../../"
+lpfile=../../$lpfile
+if test -n "$mkfile"; then mkfile=../../$mkfile; fi
+for f in $vfiles; do files="$files ../../$f"; done
+vfiles=$files
+
+stage 9 dump_proofs
+stage 10 config_output_dir
+stage 11 create_and_check_opam_library
+stage 12 compare_opam_files
+stage 13 translate_proofs
+stage 14 check_proofs

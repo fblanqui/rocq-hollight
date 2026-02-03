@@ -1,0 +1,32 @@
+#!/bin/sh
+
+. common
+
+#opam_version=2.2.1
+#dune_version=3.20.2
+#make_version=4.3
+
+hollight_version=3.1.0 # for dependencies
+hollight_commit=Release-3.1.0
+hol2dk_commit=2.1.0
+lambdapi_commit=3.0.0
+camlp5_version=8.03.06
+ocaml_version=5.3.0
+rocq_version=9.0.0
+
+mkdir -p tmp
+cd tmp
+
+set_stage
+
+stage 1 create_opam_switch
+eval `opam env`
+stage 2 install_hollight_deps
+stage 3 install lambdapi $lambdapi_commit
+stage 4 install rocq-prover $rocq_version
+stage 5 install_deps
+stage 6 install hol2dk $hol2dk_commit
+export HOL2DK_DIR=$OPAM_SWITCH_PREFIX/share/hol2dk
+stage 7 install_hollight
+export HOLLIGHT_DIR=`pwd`/hol-light
+stage 8 patch_hollight
